@@ -151,19 +151,7 @@ Day 7+:
                         → Optimize for habit formation
 ```
 
----
 
-## Success Metrics
-
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| First-session engagement time | +20% | A/B test vs. baseline |
-| Day 7 retention | +15% | Cohort comparison |
-| Day 14 retention | +10% | Primary business metric |
-| Content diversity in first week | Maintain or improve | Ensure not over-optimizing for narrow content |
-| User feedback (likes/comments) | >4.0/5.0 | Post-session feedback |
-
----
 
 ## Implementation Scope (Prototype)
 

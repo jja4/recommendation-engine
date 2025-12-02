@@ -135,26 +135,26 @@ Each recommendation includes:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Data Pipeline                             │
+│                        Data Pipeline                            │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  [Synthetic Data]                                                │
-│       │                                                          │
-│       ▼                                                          │
+│                                                                 │
+│  [Synthetic Data]                                               │
+│       │                                                         │
+│       ▼                                                         │
 │  ┌─────────────────┐                                            │
 │  │ Churn Analysis  │──── Identifies which content drives        │
 │  │                 │      retention (retention_lift scores)     │
 │  └────────┬────────┘                                            │
-│           │                                                      │
-│           ▼                                                      │
+│           │                                                     │
+│           ▼                                                     │
 │  ┌─────────────────┐                                            │
 │  │  Recommender    │──── Uses retention_lift + goal alignment   │
 │  │                 │      + completion probability              │
 │  └────────┬────────┘                                            │
-│           │                                                      │
-│           ▼                                                      │
-│  [Personalized Recommendations]                                  │
-│                                                                  │
+│           │                                                     │
+│           ▼                                                     │
+│  [Personalized Recommendations]                                 │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

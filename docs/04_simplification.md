@@ -27,7 +27,7 @@ If limited to **2 days**, here's what to keep vs cut.
 
 ## What to Cut
 
-- **ML models** — Correlation analysis gives 80% of insight
+- **ML models** — Correlation analysis gives majority of insight
 - **Sophisticated scoring** — Simple rules work for MVP
 - **Adaptive weights** — Tune later with A/B tests
 - **Synthetic data** — Use real data directly

@@ -33,4 +33,4 @@ Recommender can only surface what exists. If content library has gaps for certai
 
 - **Explainability**: Every recommendation includes human-readable reasons
 - **Latency**: Simple scoring function runs in milliseconds
-- **No dark patterns**: Optimizing for content completion, not manipulation
+- **Modularity**: Clear separation between churn analysis and recommendation logic
