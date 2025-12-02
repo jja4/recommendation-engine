@@ -38,3 +38,8 @@ Thumbs.db
 
 # uv
 uv.lock
+
+# Project outputs
+logs/
+output/
+*.png

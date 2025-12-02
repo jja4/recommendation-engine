@@ -20,7 +20,8 @@ This prototype addresses the challenge of user drop-off after the first two week
 
 ```bash
 # Clone/navigate to the project
-cd humanoo
+git clone https://github.com/jja4/recommendation-engine.git
+cd recommendation-engine
 
 # Install dependencies
 uv sync
@@ -44,18 +45,30 @@ This will:
 humanoo/
 ├── README.md                      # This file
 ├── pyproject.toml                 # Project configuration
+├── .gitignore
 ├── docs/
 │   ├── 01_problem_exploration.md  # Problem analysis
 │   ├── 02_solution_proposal.md    # Solution design
 │   ├── 03_tradeoffs_and_risks.md  # Risks and limitations
 │   ├── 04_simplification.md       # 2-day sprint scope
 │   └── EXPLANATION.md             # Technical deep-dive
-└── src/humanoo/
-    ├── __init__.py
-    ├── data_generator.py          # Synthetic data generation
-    ├── churn_analysis.py          # Feature analysis & ML
-    ├── content_recommender.py     # Recommendation engine
-    └── main.py                    # Demo entry point
+├── src/humanoo/
+│   ├── __init__.py
+│   ├── data_generator.py          # Synthetic data generation
+│   ├── churn_analysis.py          # Feature analysis & ML
+│   ├── content_recommender.py     # Recommendation engine
+│   ├── logging_config.py          # Logging setup
+│   ├── results.py                 # Results persistence
+│   └── main.py                    # Demo entry point
+├── logs/                          # Run logs (generated)
+└── output/                        # Analysis outputs (generated)
+    └── run_YYYYMMDD_HHMMSS/
+        ├── churn_correlations.csv
+        ├── cohort_comparison.csv
+        ├── content_performance.csv
+        ├── model_results.json
+        ├── recommendations.csv
+        └── run_summary.json
 ```
 
 ## What's Implemented
@@ -136,6 +149,3 @@ If this were to move toward production:
 3. **Feedback loops**: Update models based on recommendation outcomes
 4. **Scaling**: Pre-compute scores for large content libraries
 
----
-
-*Built as a case study prototype demonstrating churn analysis and content personalization approaches.*
