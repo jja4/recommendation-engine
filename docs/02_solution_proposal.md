@@ -31,30 +31,32 @@ This approach recognizes that **content is king**—the best way to retain users
 
 Identify which early engagement features correlate with long-term retention. This analysis informs both product decisions and the recommendation engine.
 
-### Key Metrics to Track
+### Features Analyzed
 
-| Metric | Definition | Why It Matters |
-|--------|------------|----------------|
-| **Time to First Success** | Minutes until first content completion | Users who complete something quickly are more likely to return |
-| **First-Session Completion Rate** | % of started content finished in session 1 | Measures content-user fit |
-| **Content Category Engagement** | Distribution of views across categories | Reveals true interests vs. stated goals |
-| **Session Depth** | Number of content pieces interacted with | Exploration predicts engagement |
-| **Return Rate (Day 1, 3, 7)** | % returning at each interval | Leading indicator of retention |
-| **Engagement Trend** | Slope of session frequency over first week | Early habit formation signal |
+| Feature | Definition | Why It Matters |
+|---------|------------|----------------|
+| **total_sessions** | Number of sessions in first week | Engagement frequency |
+| **total_content_views** | Content pieces viewed | Exploration depth |
+| **total_time_minutes** | Total engagement time | Investment level |
+| **completion_rate** | % of started content finished | Content-user fit |
+| **avg_time_per_content** | Average minutes per content | Engagement quality |
+| **unique_days_active** | Days with at least one session | Habit formation |
+| **days_since_last_activity** | Gap since last session | Disengagement signal |
+| **first_session_completions** | Completions in session 1 | Early success indicator |
+| **category_diversity** | Unique categories explored | Interest breadth |
 
 ### Analysis Approach
 
 1. **Cohort Analysis**: Compare retained vs. churned users across features
-2. **Feature Importance**: Use ML to identify strongest churn predictors
-3. **Funnel Analysis**: Where do users drop off in the first session?
-4. **Content Performance**: Which content items have highest completion and return rates?
+2. **Feature Importance**: Random Forest to identify strongest churn predictors
+3. **Content Performance**: Which content items have highest retention rates?
 
-### Expected Insights
+### Key Findings (from synthetic data)
 
-- Which content categories drive retention for different user goals and demographics
-- Optimal first-session content formats and lengths
-- Warning signals that predict churn before it happens
-- High-performing content that should be prioritized for new users
+- `days_since_last_activity` is the strongest churn predictor (+0.42 correlation)
+- `total_time_minutes` is the most important feature for the ML model
+- Retained users have ~2x more engagement time than churned users
+- First-session completion strongly correlates with retention
 
 ---
 
@@ -69,9 +71,10 @@ Dynamically personalize the first-session experience based on user signals, surf
 1. **Cold-start aware**: Must work with minimal data (new users)
 2. **Goal-aligned**: Respect stated user goals while learning true preferences
 3. **Value-first**: Optimize for content completion and satisfaction, not just clicks
-4. **Fast feedback loop**: Update recommendations within and across sessions
 
-### Recommendation Strategy
+### Current Implementation: Cold-Start Recommender
+
+The prototype implements a **cold-start recommender** that works for new users with no interaction history:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -83,25 +86,16 @@ Dynamically personalize the first-session experience based on user signals, surf
 │      ▼                                                          │
 │  ┌──────────────┐    Uses population-level data:                │
 │  │  Cold-Start  │    • Best content for stated goal             │
-│  │  Recommender │    • Highest retention content overall        │
-│  └──────────────┘    • Similar user patterns                    │
+│  │  Recommender │    • Highest retention content from analysis  │
+│  └──────────────┘    • Completion-friendly scoring              │
 │      │                                                          │
 │      ▼                                                          │
-│  [First Content Interaction]                                    │
-│      │                                                          │
-│      ▼                                                          │
-│  ┌──────────────┐    Updates based on:                          │
-│  │   Adaptive   │    • Completion/skip behavior                 │
-│  │  Recommender │    • Time spent                               │
-│  └──────────────┘    • Implicit preferences                     │
-│      │                                                          │
-│      ▼                                                          │
-│  [Subsequent Recommendations]                                   │
+│  [Recommendations]                                              │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Scoring Function (Implemented)
+### Scoring Function
 
 ```
 Score(user, content) = 
@@ -112,31 +106,54 @@ Score(user, content) =
 ```
 
 Where:
-- `GoalAlignment`: Does content category match user's stated goal?
-- `RetentionLift`: Historical retention rate for users who viewed this content (from churn analysis)
-- `CompletionFriendly`: Combines duration (shorter = better) and difficulty (beginner = better)
-- `Freshness`: Penalty for already-seen content
+- **GoalAlignment**: Does content category match user's stated goal? Uses a goal-to-category mapping (e.g., `weight_loss` → `[fitness, nutrition]`)
+- **RetentionLift**: Normalized retention rate from churn analysis (0-1 scale)
+- **CompletionFriendly**: Combines duration score (prefers 5-15 min) and difficulty score (beginner = 1.0, intermediate = 0.6, advanced = 0.3)
+- **Freshness**: Penalty for already-seen content, bonus for unseen
 
-### Adaptive Weights
+### Adaptive Weights by Session
 
 Weights adjust based on session number:
 
 | Session | GoalAlignment | RetentionLift | CompletionFriendly | Freshness |
 |---------|---------------|---------------|---------------------|-----------|
-| First | 0.40 | 0.25 | 0.25 | 0.10 |
-| Later | 0.30 | 0.30 | 0.15 | 0.25 |
+| First   | 0.40          | 0.25          | 0.25                | 0.10      |
+| Later   | 0.30          | 0.30          | 0.15                | 0.25      |
 
-First sessions prioritize goal alignment and easy wins. Later sessions balance toward proven retention content and diversity.
+First sessions prioritize goal alignment and easy wins. Later sessions shift toward proven retention content and diversity.
 
 ---
 
-## User Journey Integration
+## Future Extensions
+
+The current implementation provides a foundation that could be extended with:
+
+### 1. Within-Session Adaptive Recommender
+
+Update recommendations in real-time based on user behavior during a session:
+
+```python
+def update_after_interaction(self, content_id: str, completed: bool, time_spent: float):
+    """Adjust recommendations based on what user just did."""
+    # If user completed quickly → recommend similar content
+    # If user skipped → avoid similar content
+    # Update preference weights dynamically
+```
+
+### 2. Collaborative Filtering (Similar User Patterns)
+
+Learn from retained users' behavior to improve recommendations:
+
+```python
+# Find users with same goal who stayed
+# What content did they complete in first session?
+# Boost that content for new users with same goal
+```
+
+
+### 3. Real-Time Feedback Loop
 
 ```
-Day 0 (Sign-up):
-    User states goal → Cold-start recommender activates
-                    → Presents top 3 goal-aligned, high-retention content
-                    
 First Session:
     User interacts with content → Track completion, time, skips
                                → Update user preference model
@@ -145,18 +162,21 @@ First Session:
 Session 2-3:
     Hybrid model activates → Blend personal behavior + similar users
                           → Surface content that drove retention for similar users
-                          
-Day 7+:
-    Full personalization → Rich behavioral profile
-                        → Optimize for habit formation
 ```
 
+### 4. Full Personalization (Day 7+)
 
+Once sufficient interaction data exists:
+- Build user-specific preference profiles
+- Optimize for habit formation patterns
+- A/B test recommendation strategies
+
+---
 
 ## Implementation Scope (Prototype)
 
-For this case study, the prototype will demonstrate:
+The prototype demonstrates:
 
 1. **Synthetic data generation** with realistic user behavior patterns
 2. **Churn analysis** showing feature correlations and importance
-3. **Content recommendation model** with cold-start handling
+3. **Cold-start content recommender** with goal alignment and retention-based scoring
